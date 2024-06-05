@@ -1,0 +1,61 @@
+package bot
+
+import (
+	"github.com/EugenSleptsov/triban/commands"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"strings"
+)
+
+type Bot struct {
+	api      *tgbotapi.BotAPI
+	commands map[string]commands.Command
+}
+
+func NewBotAPI(apiKey string) (*Bot, error) {
+	botAPI, err := tgbotapi.NewBotAPI(apiKey)
+	if err != nil {
+		return nil, err
+	}
+
+	bot := &Bot{
+		api: botAPI,
+		commands: map[string]commands.Command{
+			"/help":   commands.HelpCommand{},
+			"/ininal": commands.IninalCommand{},
+			"/ziraat": commands.ZiraatCommand{},
+			"/deniz":  commands.DenizCommand{},
+		},
+	}
+
+	// Update HelpCommand with the commands list
+	bot.commands["/help"] = commands.HelpCommand{Commands: bot.commands}
+
+	return bot, nil
+}
+
+func (b *Bot) Start() {
+	b.api.Debug = true
+
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+
+	updates := b.api.GetUpdatesChan(u)
+
+	for update := range updates {
+		if update.Message == nil {
+			continue
+		}
+
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+		cmd := strings.Split(update.Message.Text, " ")[0]
+		args := strings.Fields(update.Message.Text)[1:]
+
+		if command, found := b.commands[cmd]; found {
+			msg.Text = command.Execute(args)
+		} else {
+			msg.Text = "Unknown command. Use /help to list available commands."
+		}
+
+		b.api.Send(msg)
+	}
+}
