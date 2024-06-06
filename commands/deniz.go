@@ -27,7 +27,7 @@ func (d DenizCommand) Execute(args []string) string {
 		return "Номер клиента не найден"
 	}
 
-	return ibanData.ClientNumber
+	return "Номер клиента: " + ibanData.ClientNumber
 }
 
 func (d DenizCommand) Description() string {

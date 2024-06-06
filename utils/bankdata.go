@@ -43,23 +43,24 @@ func GetDataFromIban(iban string) IbanData {
 			return ibanData
 		}
 
-		bankCode := ibanData.Bban[0:5]
 		// Trim слева по нулям
-		ibanData.BankCode = strings.TrimLeft(bankCode, "0")
+		ibanData.BankCode = strings.TrimLeft(ibanData.Bban[0:5], "0")
 
 		if consts.BankCodes[ibanData.BankCode] != "" {
 			ibanData.Bank = consts.BankCodes[ibanData.BankCode]
-			if bankCode == "15" {
+			if ibanData.BankCode == "15" {
 				ibanData.AccountNumber = ibanData.Bban
-			} else if bankCode == "10" {
+			} else if ibanData.BankCode == "10" {
 				ibanData.ClientNumber = ibanData.Bban[8:17]
+			} else if ibanData.BankCode == "134" {
+				ibanData.ClientNumber = ibanData.Bban[9:17]
 			}
 		} else if consts.PaymentCodes[ibanData.BankCode] != "" {
 			ibanData.Fintech = consts.PaymentCodes[ibanData.BankCode]
 
-			if bankCode == "832" {
+			if ibanData.BankCode == "832" {
 				ibanData.AccountNumber = ibanData.Bban[9:]
-			} else if bankCode == "829" {
+			} else if ibanData.BankCode == "829" {
 				ibanData.AccountNumber = ibanData.Bban[12:]
 				ibanData.ClientNumber = ibanData.Bban[12:]
 			}
