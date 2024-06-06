@@ -1,6 +1,9 @@
 package commands
 
-import "strings"
+import (
+	"github.com/EugenSleptsov/triban/utils"
+	"strings"
+)
 
 type DenizCommand struct{}
 
@@ -9,7 +12,22 @@ func (d DenizCommand) Execute(args []string) string {
 		return "Использование: /deniz iban"
 	}
 	iban := strings.Join(args, " ")
-	return iban
+
+	ibanData := utils.GetDataFromIban(iban)
+
+	if ibanData.Error != "" {
+		return ibanData.Error
+	}
+
+	if ibanData.BankCode != "134" {
+		return "IBAN не относится к Denizbank"
+	}
+
+	if ibanData.ClientNumber == "" {
+		return "Номер клиента не найден"
+	}
+
+	return ibanData.ClientNumber
 }
 
 func (d DenizCommand) Description() string {

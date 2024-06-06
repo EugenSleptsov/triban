@@ -1,6 +1,9 @@
 package commands
 
-import "strings"
+import (
+	"github.com/EugenSleptsov/triban/utils"
+	"strings"
+)
 
 type ZiraatCommand struct{}
 
@@ -9,7 +12,21 @@ func (z ZiraatCommand) Execute(args []string) string {
 		return "Usage: /ziraat iban"
 	}
 	iban := strings.Join(args, " ")
-	return iban
+
+	ibanData := utils.GetDataFromIban(iban)
+	if ibanData.Error != "" {
+		return ibanData.Error
+	}
+
+	if ibanData.BankCode != "10" {
+		return "IBAN не относится к Ziraat Bankasi"
+	}
+
+	if ibanData.ClientNumber == "" {
+		return "Номер клиента не найден"
+	}
+
+	return ibanData.ClientNumber
 }
 
 func (z ZiraatCommand) Description() string {
