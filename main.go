@@ -20,7 +20,7 @@ func main() {
 		log.Fatalf("TELEGRAM_TOKEN is not set in the environment")
 	}
 
-	botAPI, err := bot.NewBotAPI("")
+	botAPI, err := bot.NewBotAPI(telegramToken)
 	if err != nil {
 		log.Panic(err)
 	}
