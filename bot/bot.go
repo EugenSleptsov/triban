@@ -3,6 +3,7 @@ package bot
 import (
 	"github.com/EugenSleptsov/triban/commands"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"log"
 	"strings"
 )
 
@@ -35,13 +36,12 @@ func NewBotAPI(apiKey string) (*Bot, error) {
 }
 
 func (b *Bot) Start() {
-	b.api.Debug = true
+	// b.api.Debug = true
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 30
 
 	updates := b.api.GetUpdatesChan(u)
-
 	for update := range updates {
 		if update.Message == nil {
 			continue
@@ -50,6 +50,8 @@ func (b *Bot) Start() {
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 		cmd := strings.Split(update.Message.Text, " ")[0]
 		args := strings.Fields(update.Message.Text)[1:]
+
+		log.Print(update.Message.From.UserName + ": " + update.Message.Text)
 
 		if command, found := b.commands[cmd]; found {
 			msg.Text = command.Execute(args)
