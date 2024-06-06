@@ -49,7 +49,7 @@ func GetDataFromIban(iban string) IbanData {
 		if consts.BankCodes[ibanData.BankCode] != "" {
 			ibanData.Bank = consts.BankCodes[ibanData.BankCode]
 			if ibanData.BankCode == "15" {
-				ibanData.AccountNumber = ibanData.Bban[6:]
+				ibanData.AccountNumber = ibanData.Bban[5:]
 			} else if ibanData.BankCode == "10" {
 				ibanData.ClientNumber = ibanData.Bban[8:17]
 			} else if ibanData.BankCode == "134" {
