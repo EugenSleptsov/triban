@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"fmt"
 	"github.com/EugenSleptsov/triban/commands"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"log"
@@ -51,7 +52,8 @@ func (b *Bot) Start() {
 		cmd := strings.Split(update.Message.Text, " ")[0]
 		args := strings.Fields(update.Message.Text)[1:]
 
-		log.Print(update.Message.From.UserName + ": " + update.Message.Text)
+		logMsg := fmt.Sprintf("[%s, id: %d] %s", update.Message.From.UserName, update.Message.From.ID, update.Message.Text)
+		log.Print(logMsg)
 
 		if command, found := b.commands[cmd]; found {
 			msg.Text = command.Execute(args)
