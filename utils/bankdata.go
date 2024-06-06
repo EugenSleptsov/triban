@@ -24,6 +24,7 @@ func GetDataFromIban(iban string) IbanData {
 	ibanData := IbanData{Iban: iban}
 
 	iban = strings.ReplaceAll(iban, " ", "")
+	iban = strings.ToUpper(iban)
 	if !CheckIban(iban) {
 		ibanData.Error = "IBAN выглядит неверным (ошибка в контрольной сумме), проверьте правильность и введите правильный IBAN"
 		return ibanData
