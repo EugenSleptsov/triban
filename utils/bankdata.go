@@ -49,16 +49,19 @@ func GetDataFromIban(iban string) IbanData {
 
 		if consts.BankCodes[ibanData.BankCode] != "" {
 			ibanData.Bank = consts.BankCodes[ibanData.BankCode]
-			if ibanData.BankCode == "15" {
+			switch ibanData.BankCode {
+			case "10":
+				ibanData.ClientNumber = ibanData.Bban[8:17]
+			case "15":
 				ibanData.AccountNumber = ibanData.Bban[5:]
 				if ibanData.AccountNumber[6] == '0' {
 					ibanData.Currency = "TRY"
 				} else if ibanData.AccountNumber[6] == '4' {
 					ibanData.Currency = "Иностранная валюта"
 				}
-			} else if ibanData.BankCode == "10" {
-				ibanData.ClientNumber = ibanData.Bban[8:17]
-			} else if ibanData.BankCode == "134" {
+			case "64":
+				ibanData.AccountNumber = ibanData.Bban[11:22]
+			case "134":
 				ibanData.ClientNumber = ibanData.Bban[9:17]
 			}
 		} else if consts.PaymentCodes[ibanData.BankCode] != "" {
