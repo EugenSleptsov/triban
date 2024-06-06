@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	botAPI, err := bot.NewBotAPI("YOUR_TELEGRAM_BOT_API_KEY")
+	botAPI, err := bot.NewBotAPI("")
 	if err != nil {
 		log.Panic(err)
 	}

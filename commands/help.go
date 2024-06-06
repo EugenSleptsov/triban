@@ -7,7 +7,7 @@ type HelpCommand struct {
 }
 
 func (h HelpCommand) Execute(args []string) string {
-	helpText := "Available commands:\n"
+	helpText := "Доступные команды:\n"
 	for cmd, handler := range h.Commands {
 		helpText += fmt.Sprintf("%s — %s\n", cmd, handler.Description())
 	}
@@ -15,5 +15,5 @@ func (h HelpCommand) Execute(args []string) string {
 }
 
 func (h HelpCommand) Description() string {
-	return "List available commands"
+	return "Показывает список доступных команд"
 }

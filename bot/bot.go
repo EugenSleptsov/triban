@@ -24,6 +24,7 @@ func NewBotAPI(apiKey string) (*Bot, error) {
 			"/ininal": commands.IninalCommand{},
 			"/ziraat": commands.ZiraatCommand{},
 			"/deniz":  commands.DenizCommand{},
+			"/iban":   commands.IbanCommand{},
 		},
 	}
 
@@ -37,7 +38,7 @@ func (b *Bot) Start() {
 	b.api.Debug = true
 
 	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
+	u.Timeout = 30
 
 	updates := b.api.GetUpdatesChan(u)
 
@@ -53,7 +54,7 @@ func (b *Bot) Start() {
 		if command, found := b.commands[cmd]; found {
 			msg.Text = command.Execute(args)
 		} else {
-			msg.Text = "Unknown command. Use /help to list available commands."
+			msg.Text = "Неизвестная команда. Используйте /help для получения списка команд."
 		}
 
 		b.api.Send(msg)

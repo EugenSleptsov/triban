@@ -1,6 +1,6 @@
 package commands
 
-import "github.com/EugenSleptsov/triban/utils"
+import "strings"
 
 type ZiraatCommand struct{}
 
@@ -8,10 +8,10 @@ func (z ZiraatCommand) Execute(args []string) string {
 	if len(args) < 1 {
 		return "Usage: /ziraat iban"
 	}
-	iban := args[0]
-	return utils.CalculateAccountNumberFromIban(iban)
+	iban := strings.Join(args, " ")
+	return iban
 }
 
 func (z ZiraatCommand) Description() string {
-	return "Calculates account number from IBAN"
+	return "Высчитывает номер клиента из IBAN Ziraat bankasi"
 }
