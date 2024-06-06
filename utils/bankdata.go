@@ -15,6 +15,7 @@ type IbanData struct {
 	Fintech       string
 	AccountNumber string
 	ClientNumber  string
+	Currency      string
 	Error         string
 	Description   string
 }
@@ -50,6 +51,11 @@ func GetDataFromIban(iban string) IbanData {
 			ibanData.Bank = consts.BankCodes[ibanData.BankCode]
 			if ibanData.BankCode == "15" {
 				ibanData.AccountNumber = ibanData.Bban[5:]
+				if ibanData.AccountNumber[6] == '0' {
+					ibanData.Currency = "TRY"
+				} else if ibanData.AccountNumber[6] == '4' {
+					ibanData.Currency = "Иностранная валюта"
+				}
 			} else if ibanData.BankCode == "10" {
 				ibanData.ClientNumber = ibanData.Bban[8:17]
 			} else if ibanData.BankCode == "134" {

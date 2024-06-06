@@ -28,13 +28,16 @@ func (i IbanCommand) Execute(args []string) string {
 	} else if ibanData.Fintech != "" {
 		str += "Финансовая организация: " + ibanData.Fintech + "\n"
 	}
-
-	if ibanData.AccountNumber != "" {
-		str += "Номер счета: " + ibanData.AccountNumber + "\n"
-	}
 	if ibanData.ClientNumber != "" {
 		str += "Номер клиента: " + ibanData.ClientNumber + "\n"
 	}
+	if ibanData.AccountNumber != "" {
+		str += "Номер счета: " + ibanData.AccountNumber + "\n"
+	}
+	if ibanData.Currency != "" {
+		str += "Валюта: " + ibanData.Currency + "\n"
+	}
+
 	if ibanData.Description != "" {
 		str += ibanData.Description + "\n"
 	}
