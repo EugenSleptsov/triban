@@ -9,6 +9,9 @@ func FormatIban(iban string) string {
 	// Remove spaces
 	iban = strings.ReplaceAll(iban, " ", "")
 
+	// Upper case
+	iban = strings.ToUpper(iban)
+
 	// Create a slice to store the formatted IBAN parts
 	var formatted []string
 
