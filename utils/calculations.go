@@ -41,3 +41,8 @@ func Mod97(number string) int {
 	}
 	return remainder
 }
+
+func FloatToString(input_num float64) string {
+	// to convert a float number to a string with 4 digits
+	return fmt.Sprintf("%.4f", input_num)
+}

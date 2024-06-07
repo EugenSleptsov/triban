@@ -27,6 +27,7 @@ func NewBotAPI(apiKey string) (*Bot, error) {
 			"/ziraat": commands.ZiraatCommand{},
 			"/deniz":  commands.DenizCommand{},
 			"/iban":   commands.IbanCommand{},
+			"/usd":    commands.UsdCommand{},
 		},
 	}
 
