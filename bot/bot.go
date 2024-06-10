@@ -27,7 +27,7 @@ func NewBotAPI(apiKey string) (*Bot, error) {
 			"/ziraat": commands.ZiraatCommand{},
 			"/deniz":  commands.DenizCommand{},
 			"/iban":   commands.IbanCommand{},
-			"/usd":    commands.UsdCommand{},
+			"/usd":    &commands.UsdCommand{},
 		},
 	}
 
@@ -38,7 +38,7 @@ func NewBotAPI(apiKey string) (*Bot, error) {
 }
 
 func (b *Bot) Start() {
-	// b.api.Debug = true
+	log.Println("Bot started")
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 30

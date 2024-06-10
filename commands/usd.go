@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 )
 
 type BankRate struct {
@@ -16,9 +18,22 @@ type BankRate struct {
 	Selling  float64
 }
 
-type UsdCommand struct{}
+type UsdCommand struct {
+	lastFetchTime time.Time
+	previousRates map[string]BankRate
+	currentRates  map[string]BankRate
+	mutex         sync.Mutex
+}
 
-func (d UsdCommand) Execute(args []string) string {
+func (d *UsdCommand) Execute(args []string) string {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+
+	// Check if the rates were fetched within the last 10 minutes
+	if time.Since(d.lastFetchTime) < 10*time.Minute {
+		return d.formatRates(d.currentRates, d.previousRates, d.lastFetchTime)
+	}
+
 	url := "https://kur.doviz.com/kapalicarsi/amerikan-dolari"
 
 	// Getting content
@@ -42,9 +57,8 @@ func (d UsdCommand) Execute(args []string) string {
 		return "Ошибка получения курсов валюты USD"
 	}
 
-	var BankRates []BankRate
-
-	// Extracting the <tr> elements
+	// Extracting the rates
+	newRates := make(map[string]BankRate)
 	doc.Find(".value-table .table.table-narrow.sortable table tbody tr").Each(func(i int, s *goquery.Selection) {
 		bankName := strings.TrimSpace(s.Find("td:nth-child(1)").Text())
 		buyingStr := strings.TrimSpace(s.Find("td:nth-child(2)").Text())
@@ -62,26 +76,66 @@ func (d UsdCommand) Execute(args []string) string {
 			return
 		}
 
-		BankRates = append(BankRates, BankRate{
+		newRates[bankName] = BankRate{
 			BankName: bankName,
 			Buying:   buying,
 			Selling:  selling,
-		})
+		}
 	})
 
-	if len(BankRates) == 0 {
+	if len(newRates) == 0 {
 		log.Printf("Empty bank rates")
 		return "Ошибка получения курсов валюты USD"
 	}
 
-	var result string
-	for _, rate := range BankRates {
-		result += fmt.Sprintf("%s\nПокупка: %s\nПродажа: %s\n\n", rate.BankName, utils.FloatToString(rate.Buying), utils.FloatToString(rate.Selling))
-	}
+	// Update the cache
+	d.previousRates = d.currentRates
+	d.currentRates = newRates
+	d.lastFetchTime = time.Now()
 
+	return d.formatRates(d.currentRates, d.previousRates, d.lastFetchTime)
+}
+func (d *UsdCommand) formatRates(rates map[string]BankRate, lastRates map[string]BankRate, lastFetchTime time.Time) string {
+	var result string
+	result += "Курсы валюты USD на момент " + lastFetchTime.Format("15:04:05") + ":\n\n"
+
+	sortedKeys := sortedKeys(rates)
+
+	for _, bankName := range sortedKeys {
+		rate := rates[bankName]
+		if lastRate, ok := lastRates[bankName]; ok {
+			// Calculate changes
+			buyingChange := rate.Buying - lastRate.Buying
+			sellingChange := rate.Selling - lastRate.Selling
+
+			result += fmt.Sprintf(
+				"%s\nПокупка: %s (%+.4f)\nПродажа: %s (%+.4f)\n\n",
+				bankName,
+				utils.FloatToString(rate.Buying), buyingChange,
+				utils.FloatToString(rate.Selling), sellingChange,
+			)
+		} else {
+			// No previous info, show only current rates
+			result += fmt.Sprintf(
+				"%s\nПокупка: %s\nПродажа: %s\n\n",
+				bankName,
+				utils.FloatToString(rate.Buying),
+				utils.FloatToString(rate.Selling),
+			)
+		}
+	}
 	return result
 }
 
-func (d UsdCommand) Description() string {
+func (d *UsdCommand) Description() string {
 	return "Информация о курсах валюты USD в разных банках"
+}
+
+func sortedKeys(unsortedMap map[string]BankRate) []string {
+	keys := make([]string, 0, len(unsortedMap))
+	for key := range unsortedMap {
+		keys = append(keys, key)
+	}
+	utils.SortStrings(keys)
+	return keys
 }

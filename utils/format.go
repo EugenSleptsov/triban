@@ -27,3 +27,14 @@ func FormatIban(iban string) string {
 	// Join the chunks with spaces
 	return strings.Join(formatted, " ")
 }
+
+func SortStrings(s []string) {
+	// Sorts the slice of strings in ascending order
+	for i := 0; i < len(s); i++ {
+		for j := i + 1; j < len(s); j++ {
+			if s[i] > s[j] {
+				s[i], s[j] = s[j], s[i]
+			}
+		}
+	}
+}
