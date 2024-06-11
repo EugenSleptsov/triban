@@ -49,7 +49,6 @@ func (b *Bot) Start() {
 			continue
 		}
 
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 		cmd := strings.Split(update.Message.Text, " ")[0]
 		args := strings.Fields(update.Message.Text)[1:]
 
@@ -57,11 +56,33 @@ func (b *Bot) Start() {
 		log.Print(logMsg)
 
 		if command, found := b.commands[cmd]; found {
-			msg.Text = command.Execute(args)
+			b.SendMarkdown(update.Message.Chat.ID, command.Execute(args))
 		} else {
-			msg.Text = "Неизвестная команда. Используйте /help для получения списка команд."
+			b.Send(update.Message.Chat.ID, "Неизвестная команда. Используйте /help для получения списка команд.", false)
 		}
-
-		b.api.Send(msg)
 	}
+}
+
+func (b *Bot) SendMarkdown(chatID int64, text string) {
+	b.Send(chatID, text, true)
+}
+
+func (b *Bot) Send(chatID int64, text string, isMarkdown bool) {
+	msg := tgbotapi.NewMessage(chatID, text)
+	if isMarkdown {
+		msg.ParseMode = "MarkdownV2"
+		msg.Text = escapeMarkdownV2(msg.Text)
+	}
+	_, err := b.api.Send(msg)
+	if err != nil {
+		log.Printf("Error sending message: %v", err)
+	}
+}
+
+func escapeMarkdownV2(text string) string {
+	charsToEscape := []string{"_", "*", "[", "]", "(", ")", "~", ">", "#", "+", "-", "=", "|", "{", "}", ".", "!"}
+	for _, char := range charsToEscape {
+		text = strings.ReplaceAll(text, char, "\\"+char)
+	}
+	return text
 }

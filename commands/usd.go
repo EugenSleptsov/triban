@@ -101,26 +101,41 @@ func (d *UsdCommand) formatRates(rates map[string]BankRate, lastRates map[string
 
 	sortedKeys := sortedKeys(rates)
 
+	bestBuy, bestSell := bestBuySellRate(rates)
+
 	for _, bankName := range sortedKeys {
 		rate := rates[bankName]
+		buyingRate := utils.FloatToString(rate.Buying)
+		sellingRate := utils.FloatToString(rate.Selling)
+
+		// Bold the best buy rate
+		if rate.Buying == bestBuy.Buying {
+			buyingRate = "❗" + buyingRate + "❗"
+		}
+
+		// Bold the best sell rate
+		if rate.Selling == bestSell.Selling {
+			sellingRate = "❗" + sellingRate + "❗"
+		}
+
 		if lastRate, ok := lastRates[bankName]; ok {
 			// Calculate changes
 			buyingChange := rate.Buying - lastRate.Buying
 			sellingChange := rate.Selling - lastRate.Selling
 
 			result += fmt.Sprintf(
-				"%s\nПокупка: %s (%+.4f)\nПродажа: %s (%+.4f)\n\n",
+				"%s\nПокупка: %s (%+.4f) | Продажа: %s (%+.4f)\n\n",
 				bankName,
-				utils.FloatToString(rate.Buying), buyingChange,
-				utils.FloatToString(rate.Selling), sellingChange,
+				buyingRate, buyingChange,
+				sellingRate, sellingChange,
 			)
 		} else {
 			// No previous info, show only current rates
 			result += fmt.Sprintf(
-				"%s\nПокупка: %s\nПродажа: %s\n\n",
+				"%s\nПокупка: %s | Продажа: %s\n\n",
 				bankName,
-				utils.FloatToString(rate.Buying),
-				utils.FloatToString(rate.Selling),
+				buyingRate,
+				sellingRate,
 			)
 		}
 	}
@@ -138,4 +153,24 @@ func sortedKeys(unsortedMap map[string]BankRate) []string {
 	}
 	utils.SortStrings(keys)
 	return keys
+}
+
+func bestBuySellRate(rates map[string]BankRate) (bestBuy BankRate, bestSell BankRate) {
+	// Initialize bestBuy and bestSell with extreme values to ensure proper comparison
+	bestBuy = BankRate{Buying: -1.0, Selling: 0.0}
+	bestSell = BankRate{Buying: 0.0, Selling: 1e9}
+	for _, rate := range rates {
+		// this banks should not be checked
+		if map[string]bool{"Harem": true, "Odacı": true, "Kapalıçarşı": true, "Merkez Bankası": true, "Venüs": true, "Altınkaynak": true}[rate.BankName] {
+			continue
+		}
+
+		if rate.Buying > bestBuy.Buying {
+			bestBuy = rate
+		}
+		if rate.Selling < bestSell.Selling {
+			bestSell = rate
+		}
+	}
+	return
 }
